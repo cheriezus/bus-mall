@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"name": "bus-mall",
+			"path": "."
+		},
+		{
+			"name": "img",
+			"path": "../seattle-code-201d85/class-11/inclass-demo/img"
+		}
+	],
+	"settings": {
+		"liveServer.settings.port": 5503,
+		"liveServer.settings.multiRootWorkspaceName": "bus-mall"
+	}
+}

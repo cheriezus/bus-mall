@@ -1,8 +1,9 @@
 'use strict';
 
 
+
 //***************** Global Variables *****************
-let votingRounds = 5;
+let votingRounds = 25;
 let productArray = [];
 
 
@@ -13,8 +14,14 @@ let imgOne = document.getElementById('image-one');
 let imgTwo = document.getElementById('image-two');
 let imgThree = document.getElementById('image-three');
 
-let resultsList = document.getElementById('display-results');
-let resultsBtn = document.getElementById('show-results-btn');
+// let resultsList = document.getElementById('display-results');
+// let resultsBtn = document.getElementById('show-results-btn');
+
+
+//***************** Canvas Reference ************
+
+let ctx = document.getElementById('myChart');
+
 
 
 //********************* Constructor ********* this refers to the object that gets instantiated from this constructor
@@ -59,26 +66,32 @@ new Product('wine-glass');
 // you can use the "img" property from the object contructor. REMEMBER: you turned it into an Array, so you have to treat it like an Array.
 
 
-// creating the function to make the images populate randomly on the page. create the function NAME, then place the random function ((math.random)that already exists), along with the math.floor function.
+// creating the function to make the images populate randomly on the page. create the function NAME, then place the random function math.randomthat already exists, along with the math.floor function.
 
-function getRandomIndex(){
+function getRandomIndex() {
   // sourced from w3 schools
-  return Math.floor(Math.random()*productArray.length);
+  return Math.floor(Math.random() * productArray.length);
 }
 
 
 // in order to randomize the photos, you need to create a function that combines the rendered image with the random fumction:
 
+let indexArray = [];
+
 function renderImg() {
+  let productOneIndex = indexArray.pop();
+  let productTwoIndex = indexArray.pop();
+  let productThreeIndex = indexArray.pop();
 
-  let productOneIndex = getRandomIndex();
-  let productTwoIndex = getRandomIndex();
-  let productThreeIndex = getRandomIndex();
+  while (indexArray.length < 3) {
+    let randomNumber = getRandomIndex();
+    if (!indexArray.includes(randomNumber)) {
+      (indexArray.push(randomNumber));
+    }
+  }
 
-  while (productOneIndex === productTwoIndex | productTwoIndex === productThreeIndex | productOneIndex === productThreeIndex) {
-    productTwoIndex = getRandomIndex(); productThreeIndex = getRandomIndex(); productOneIndex = getRandomIndex();}
 
-  imgOne.src = productArray[productOneIndex].img;
+  imgOne.setAttribute('src', productArray[productOneIndex].img);
   imgOne.alt = productArray[productOneIndex].productName;
   // bottom function adds a view each time it appears on the page
   productArray[productOneIndex].views++;
@@ -93,14 +106,15 @@ function renderImg() {
   // bottom function adds a view each time it appears on the page
   productArray[productThreeIndex].views++;
 }
-console.log(productArray);
+
 renderImg();
+
 
 // **************** Event Handlers ****************
 // parameter comes from this add event listener. this ad event listener passes the whole event to this function.
 // you dont need parantheses for handle click because once the user clicks the photo, it's going to call this function and it's going to pass it the event.
 
-function handleClick(event){
+function handleClick(event) {
   let imgClicked = event.target.alt;
 
   // cannot use "this." because you're not in your object from a constructor
@@ -111,7 +125,7 @@ function handleClick(event){
   // this loop functions activates when an image is clicked. the for loop goes through the whole array, and if it runs into the image that was clicked, it adds a number to the amount of clicks
 
   for (let i = 0; i < productArray.length; i++) {
-    if(imgClicked === productArray[i].productName){
+    if (imgClicked === productArray[i].productName) {
       productArray[i].click++;
     }
   }
@@ -120,25 +134,77 @@ function handleClick(event){
   votingRounds--;
 
   // to stop the clicks, you remove the event listener
-  if(votingRounds === 0){
+  if (votingRounds === 0) {
     imgContainer.removeEventListener('click', handleClick);
+
+    //chart render
+    renderProductChart();
   }
-  //rerenders 2 new products
+
+
+  //rerenders 3 new products
   renderImg();
 }
 
-// the reason for this function is to render the "li's" once someone clicks the submit button
+function renderProductChart() {
+  let productNames = [];
 
-function handleShowResults(){
-  if(votingRounds === 0){
-    for(let i = 0; i < productArray.length; i++){
-      let li = document.createElement('li');
-      li.textContent = `${productArray[i].productName} was shown ${productArray[i].views} and clicked ${productArray[i].click} times`;
-      resultsList.appendChild(li);
-    }
-
+  for(let i = 0; i < productArray.length; i++){
+    productNames.push(productArray[i].productName)
   }
-}
+
+  function renderProductChart() {
+
+    // Creating arrays to help with labels and dataset
+    let productNames = [];
+    let productVotes = [];
+    let productViews = [];
+  
+    for(let i = 0; i < productArray.length; i++){
+      productNames.push(productArray[i].productName);
+      productVotes.push(productArray[i].click);
+      productViews.push(productArray[i].views);
+    }
+  
+    let myChartObj = {
+      type: 'bar',
+      data: {
+        labels: productNames, 
+        datasets: [{
+          label: '# of Votes', 
+          data: productVotes,
+          backgroundColor: [
+            'blue'
+          ],
+          borderColor: [
+            'blue'
+          ],
+          borderWidth: 1
+        },
+        {
+          label: '# of Views', // # votes and # views
+          data: productViews, // the actual view or votes
+          backgroundColor: [
+            'black'
+          ],
+          borderColor: [
+            'black'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    };
+  
+  
+    new Chart(ctx, myChartObj);
+  }
 //**************** Event Listeners ****************
 imgContainer.addEventListener('click', handleClick);
 resultsBtn.addEventListener('click', handleShowResults);
